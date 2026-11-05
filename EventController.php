@@ -37,5 +37,23 @@ class EventController {
         }
         go('event', ['id'=>$id]);
     }
+    public function cancel(): void {
+        $me = require_role('student', 'club_leader');
+        $id = valid_int($_POST['event_id'] ?? null);
+        $changed = transaction(function () use ($me, $id): bool {
+            $event = row('SELECT starts_at,registration_deadline,status FROM events WHERE id=? FOR UPDATE', [$id]);
+            if (!$event || $event['status'] !== 'approved' || !is_future($event['starts_at'])
+                || ($event['registration_deadline'] && !is_future($event['registration_deadline']))) return false;
+            $registration = row("SELECT id FROM event_registrations WHERE event_id=? AND user_id=? AND status='registered'", [$id,$me['id']]);
+            if (!$registration) return false;
+            execute('DELETE FROM attendance WHERE registration_id=?', [$registration['id']]);
+            execute('DELETE FROM event_feedback WHERE registration_id=?', [$registration['id']]);
+            execute("UPDATE event_registrations SET status='cancelled',attended_at=NULL WHERE id=?", [$registration['id']]);
+            audit('registration_cancelled', 'event', $id);
+            return true;
+        });
+        flash($changed?'success':'warning', $changed?'Your registration was cancelled.':'Cancellation is unavailable: registration has closed or you have no active booking.');
+        go('event', ['id'=>$id]);
+    }
 
 }
