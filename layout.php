@@ -31,4 +31,12 @@ $unread = $viewer ? scalar('SELECT COUNT(*) FROM notifications WHERE user_id=? A
  </nav>
  </div></header>
 <main id="main-content">
- 
+ <?php if($flashes): ?><div class="container flash-stack" role="status" aria-live="polite"><?php foreach($flashes as $f): ?><div class="flash flash-<?= e($f['kind']) ?>"><span><?= e($f['message']) ?></span><button type="button" class="flash-close" aria-label="Dismiss notice">×</button></div><?php endforeach; ?></div><?php endif; ?>
+ <?php require $viewFile; ?>
+</main>
+<footer class="site-footer"><div class="container footer-main">
+ <div><div class="footer-brand"><img src="<?= e(asset('mark.svg')) ?>" width="34" height="34" alt=""><strong>Vanni Campus Connect</strong></div><p>A student-developed demonstration for managing campus events, societies, and community participation.</p></div>
+ <div><strong>Explore</strong><a href="<?= e(url('events')) ?>">Campus events</a><a href="<?= e(url('clubs')) ?>">Clubs & societies</a><a href="<?= e(url('calendar')) ?>">Event calendar</a></div>
+ <div><strong>Information</strong><a href="<?= e(url('about')) ?>">About this project</a><a href="https://www.vau.ac.lk/societies-and-clubs/" target="_blank" rel="noopener noreferrer">Official club directory ↗</a><a href="https://www.vau.ac.lk/" target="_blank" rel="noopener noreferrer">University of Vavuniya ↗</a></div>
+</div><div class="container footer-bottom"><span>© <?= date('Y') ?> Vanni Campus Connect · Educational demonstration</span><span>Independent student project · Not an official UoV service · Sri Lanka Standard Time</span></div></footer>
+</body></html>
