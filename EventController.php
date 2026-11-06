@@ -56,4 +56,24 @@ class EventController {
         go('event', ['id'=>$id]);
     }
 
+    public function feedback(): void {
+        $me = require_role('student', 'club_leader');
+        $id = valid_int($_POST['event_id'] ?? null);
+        $rating = valid_int($_POST['rating'] ?? null);
+        $comment = post_str('comment');
+        $saved = transaction(function () use ($me,$id,$rating,$comment): bool {
+            // Attendance changes lock this same event row before changing eligibility.
+            $event = row('SELECT status,ends_at FROM events WHERE id=? FOR UPDATE', [$id]);
+            $registration = row("SELECT r.id,a.is_present FROM event_registrations r LEFT JOIN attendance a ON a.registration_id=r.id WHERE r.event_id=? AND r.user_id=? AND r.status='registered'", [$id,$me['id']]);
+            if (!$event || !$registration || !(int)$registration['is_present'] || $event['status'] !== 'completed'
+                || is_future($event['ends_at']) || $rating < 1 || $rating > 5 || text_length($comment) > 1500) return false;
+            execute('INSERT INTO event_feedback(event_id,user_id,registration_id,rating,comment) VALUES(?,?,?,?,?) ON DUPLICATE KEY UPDATE registration_id=VALUES(registration_id),rating=VALUES(rating),comment=VALUES(comment),created_at=NOW()', [$id,$me['id'],$registration['id'],$rating,$comment?:null]);
+            audit('event_feedback', 'event', $id);
+            return true;
+        });
+        flash($saved?'success':'danger', $saved?'Thank you for sharing your feedback.':'Feedback requires a completed event, attendance marked present, a rating of 1–5 and a comment of at most 1,500 characters.');
+        go('event', ['id'=>$id]);
+    }
 }
+
+
