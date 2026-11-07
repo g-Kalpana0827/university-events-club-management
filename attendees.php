@@ -21,3 +21,44 @@
     <?= $r['is_present']===null?'Not marked':((int)$r['is_present']===1?'<span class="success-note">Present</span>':'Absent') ?></td>
     <td><?php if($r['status']==='registered' && in_array($event['status'],['approved','completed'],true) && strtotime($event['starts_at'])<=time()): ?>
     </td>
+
+    <td><?php if($r['status']==='registered' && in_array($event['status'],['approved','completed'],true) && strtotime($event['starts_at'])<=time()): ?>
+        <div class="row-actions">
+            <form method="post" action="<?= e(url('leader/attendance')) ?>"><?= csrf_field() ?>
+            <input type="hidden" name="club_id" value="<?= (int)$clubId ?>">
+            <input type="hidden" name="event_id" value="<?= (int)$event['id'] ?>">
+            <input type="hidden" name="registration_id" value="<?= (int)$r['id'] ?>">
+            <button name="attended" value="yes" type="submit" class="btn btn-success btn-sm">Present</button>
+            <button name="attended" value="no" type="submit" class="btn btn-outline btn-sm">Absent</button>
+            <button name="attended" value="clear" type="submit" class="btn btn-outline btn-sm">Clear</button>
+            </form>
+        </div>
+    <?php else: ?>
+        <span class="small-muted">—</span>
+    <?php endif; ?>
+    </td><div class="row-actions">
+            <form method="post" action="<?= e(url('leader/attendance')) ?>"><?= csrf_field() ?>
+            <input type="hidden" name="club_id" value="<?= (int)$clubId ?>">
+            <input type="hidden" name="event_id" value="<?= (int)$event['id'] ?>">
+            <input type="hidden" name="registration_id" value="<?= (int)$r['id'] ?>">
+            <button name="attended" value="yes" type="submit" class="btn btn-success btn-sm">Present</button>
+            <button name="attended" value="no" type="submit" class="btn btn-outline btn-sm">Absent</button>
+            <button name="attended" value="clear" type="submit" class="btn btn-outline btn-sm">Clear</button>
+            </form>
+        </div>
+    <?php else: ?>
+        <span class="small-muted">—</span>
+    <?php endif; ?>
+    </td>
+</tr>
+<?php endforeach; ?>
+<?php if(!$registrations): ?>
+    <tr>
+        <td colspan="6" class="small-muted">No registered participants yet.</td>
+    </tr>
+<?php endif; ?>
+</tbody>
+</table>
+</div>
+</div>
+</section>
