@@ -1,0 +1,4 @@
+Options -Indexes
+<FilesMatch "^(README\.md|vendor_autoload\.php)$">
+  Require all denied
+</FilesMatch>
