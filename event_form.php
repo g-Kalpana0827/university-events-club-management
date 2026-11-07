@@ -1,0 +1,45 @@
+<section class="page-banner">
+ <div class="container">
+        <a class="back-link" href="<?= e(url('leader',['club_id'=>$club['id']])) ?>">← Club studio</a>
+         <div class="section-label">EVENT PLANNING</div>
+    
+         <h1><?= $event?'Edit event proposal':'Create event proposal' ?></h1>
+    
+    <p>Club organizers submit events; administrators review them before publication.</p>
+</div>
+</section>
+
+
+<section class="section container narrow">
+    <div class="card panel">
+        <form method="post" action="<?= e(url('leader/event/save')) ?>" class="form-stack"><?= csrf_field() ?>
+            <input type="hidden" name="club_id" value="<?= (int)$club['id'] ?>"><?php if($event): ?>
+            <input type="hidden" name="id" value="<?= (int)$event['id'] ?>"><?php endif; ?>
+<div class="form-note">Organizing society: <strong><?= e($club['name']) ?></strong></div>
+
+
+<?php if($event && $event['review_note']): ?><div class="form-note"><strong>Administrator feedback:</strong> <?= e($event['review_note']) ?></div><?php endif; ?>
+
+<label>Event title<input required name="title" minlength="5" maxlength="180" value="<?= e($event['title']??'') ?>" placeholder="e.g. Introduction to Open Source"></label>
+
+<label>Description<textarea name="description" required minlength="20" maxlength="10000" rows="7" placeholder="What can participants expect?"><?= e($event['description']??'') ?></textarea></label>
+
+<div class="form-grid">
+    <label>Event category<select required name="category_id"><option value="">Choose category</option><?php foreach($categories as $category): ?><option value="<?= (int)$category['id'] ?>" <?= (int)($event['category_id']??0)===(int)$category['id']?'selected':'' ?>><?= e($category['name']) ?></option><?php endforeach; ?></select></label>
+    <label>Venue<select required name="venue_id"><option value="">Choose approved venue</option><?php foreach($venues as $venue): ?><option value="<?= (int)$venue['id'] ?>" <?= (int)($event['venue_id']??0)===(int)$venue['id']?'selected':'' ?>><?= e($venue['name']) ?> (max <?= (int)$venue['capacity'] ?>)</option><?php endforeach; ?></select></label>
+</div>
+<div class="form-grid">
+    <label>Starts (Sri Lanka)<input type="datetime-local" name="starts_at" required value="<?= e(isset($event['starts_at'])?date('Y-m-d\TH:i',strtotime($event['starts_at'])):'') ?>"></label>
+    <label>Ends (Sri Lanka)<input type="datetime-local" name="ends_at" required value="<?= e(isset($event['ends_at'])?date('Y-m-d\TH:i',strtotime($event['ends_at'])):'') ?>"></label>
+</div>
+
+<label>Registration deadline (on or before start)<input name="registration_deadline" type="datetime-local" required value="<?= e(!empty($event['registration_deadline'])?date('Y-m-d\TH:i',strtotime($event['registration_deadline'])):'') ?>"></label>
+
+<label>Maximum participants<input name="capacity" type="number" min="1" max="100000" required value="<?= (int)($event['capacity']??60) ?>"></label>
+
+<div class="form-note">The seat limit must not exceed venue capacity. Once an event is approved, its proposal cannot be edited. If its schedule must change, cancel it and submit a new event.</div>
+
+<button class="btn btn-primary" type="submit"><?= $event?'Save changes & resubmit':'Submit for approval' ?> →</button>
+</form>
+</div>
+</section>
