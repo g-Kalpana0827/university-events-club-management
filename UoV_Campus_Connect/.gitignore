@@ -1,0 +1,10 @@
+.vscode/
+.idea/
+.env
+config/local.php
+*.log
+.DS_Store
+Thumbs.db
+
+__pycache__/
+*.pyc
