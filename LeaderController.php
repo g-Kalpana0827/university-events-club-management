@@ -1,3 +1,5 @@
+         <?php
+         
          public function eventForm(): void {
         $clubId=valid_int($_GET['club_id']??null);$club=$this->manager($clubId);
         $event=null;$id=valid_int($_GET['id']??null);
@@ -90,5 +92,6 @@
         }
         go('leader',['club_id'=>$clubId]);
     }
+?>
    
    
