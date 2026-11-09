@@ -64,5 +64,31 @@
             notify((int)$admin['id'],'Event awaiting approval',$title.' from '.$club['name'].' needs review.','admin/events');
         audit('event_submitted','event',$id);flash('success','Event proposal submitted for approval.');go('leader',['club_id'=>$clubId]);
     }
-    
+   
+   
+    public function eventCancel(): void {
+        $clubId=valid_int($_POST['club_id']??null);$this->manager($clubId);$id=valid_int($_POST['event_id']??null);
+        $event=row('SELECT title,status FROM events WHERE id=? AND club_id=?',[$id,$clubId]);
+        if($event && in_array($event['status'],['pending','approved'],true)) {
+            execute("UPDATE events SET status='cancelled' WHERE id=? AND club_id=?",[$id,$clubId]);
+            foreach(rows("SELECT user_id FROM event_registrations WHERE event_id=? AND status='registered'",[$id]) as $r) notify((int)$r['user_id'],'Event cancelled',$event['title'].' has been cancelled.','dashboard');
+            audit('event_cancelled','event',$id);flash('success','Event cancelled and participants notified.');
+        }
+        go('leader',['club_id'=>$clubId]);
+    }
+
+
+    public function eventComplete(): void {
+        $clubId=valid_int($_POST['club_id']??null);$this->manager($clubId);
+        $id=valid_int($_POST['event_id']??null);
+        $event=row('SELECT id,status,ends_at FROM events WHERE id=? AND club_id=?',[$id,$clubId]);
+        if(!$event||$event['status']!=='approved'||strtotime($event['ends_at'])>time()){
+            flash('warning','Only approved events that have ended can be marked complete.');
+        }else{
+            execute("UPDATE events SET status='completed' WHERE id=?",[$id]);
+            audit('event_completed','event',$id);flash('success','Event marked completed. Attendees may submit feedback.');
+        }
+        go('leader',['club_id'=>$clubId]);
+    }
+   
    
